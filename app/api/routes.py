@@ -185,29 +185,81 @@ def send_job_email():
         return jsonify({'error': 'SMTP configuration not found'}), 404
     
     try:
-        # Prepare template variables
-        template_variables = {
+        # Parse email addresses (support both single and multiple)
+        hr_email_input = data['hr_email']
+        if isinstance(hr_email_input, str):
+            # Split by comma or semicolon and clean up
+            import re
+            email_list = re.split(r'[,;]', hr_email_input)
+            email_list = [email.strip() for email in email_list if email.strip()]
+        else:
+            email_list = [hr_email_input] if hr_email_input else []
+
+        if not email_list:
+            return jsonify({'error': 'No valid email addresses provided'}), 400
+
+        # Parse names if provided
+        hr_name_input = data.get('hr_name', '')
+        if hr_name_input:
+            name_list = [name.strip() for name in hr_name_input.split(',') if name.strip()]
+        else:
+            name_list = []
+
+        # Prepare base template variables
+        base_template_variables = {
             'company_name': data.get('company_name', ''),
             'company_domain': data.get('company_domain', ''),
             'position': data.get('position', ''),
-            'hr_name': data.get('hr_name', ''),
             'user_phone': data.get('user_phone', '')
         }
-        
-        # Send email
+
+        # Send emails to each recipient
         sender = EmailSender()
-        success, message = sender.send_templated_email(
-            smtp_config=smtp_config,
-            email_template=template,
-            recipient_email=data['hr_email'],
-            template_variables=template_variables,
-            recipient_name=data.get('hr_name')
-        )
-        
-        return jsonify({
-            'success': success,
-            'message': message
-        })
+        successful_sends = []
+        failed_sends = []
+
+        for i, email in enumerate(email_list):
+            # Get corresponding name if available
+            recipient_name = name_list[i] if i < len(name_list) else ''
+
+            # Prepare template variables for this recipient
+            template_variables = base_template_variables.copy()
+            template_variables['hr_name'] = recipient_name
+
+            # Send email to this recipient
+            success, message = sender.send_templated_email(
+                smtp_config=smtp_config,
+                email_template=template,
+                recipient_email=email,
+                template_variables=template_variables,
+                recipient_name=recipient_name
+            )
+
+            if success:
+                successful_sends.append(email)
+            else:
+                failed_sends.append({'email': email, 'error': message})
+
+        # Return results
+        if successful_sends and not failed_sends:
+            return jsonify({
+                'success': True,
+                'message': f'Successfully sent to {len(successful_sends)} recipient(s)',
+                'successful_sends': successful_sends
+            })
+        elif successful_sends and failed_sends:
+            return jsonify({
+                'success': True,
+                'message': f'Partially successful: {len(successful_sends)} sent, {len(failed_sends)} failed',
+                'successful_sends': successful_sends,
+                'failed_sends': failed_sends
+            })
+        else:
+            return jsonify({
+                'success': False,
+                'message': f'Failed to send to all {len(failed_sends)} recipient(s)',
+                'failed_sends': failed_sends
+            })
     
     except Exception as e:
         return jsonify({'error': str(e)}), 500

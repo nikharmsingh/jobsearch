@@ -314,30 +314,57 @@ def send_manual_email():
             return render_template('main/send_manual_email.html', title='Send Manual Email', form=form)
 
         try:
-            # Prepare template variables
-            template_variables = {
+            # Get email and name lists
+            email_list = form.get_email_list()
+            name_list = form.get_name_list()
+
+            # Prepare base template variables
+            base_template_variables = {
                 'company_name': form.company_name.data or '',
                 'company_domain': form.company_domain.data or '',
                 'position': form.position.data or '',
-                'hr_name': form.hr_name.data or '',
                 'user_phone': getattr(current_user, 'phone', '') or ''
             }
 
-            # Send email
+            # Send emails to each recipient
             sender = EmailSender()
-            success, message = sender.send_templated_email(
-                smtp_config=smtp_config,
-                email_template=template,
-                recipient_email=form.hr_email.data,
-                template_variables=template_variables,
-                recipient_name=form.hr_name.data
-            )
+            successful_sends = []
+            failed_sends = []
 
-            if success:
-                flash('Email sent successfully!', 'success')
+            for i, email in enumerate(email_list):
+                # Get corresponding name if available
+                recipient_name = name_list[i] if i < len(name_list) else ''
+
+                # Prepare template variables for this recipient
+                template_variables = base_template_variables.copy()
+                template_variables['hr_name'] = recipient_name
+
+                # Send email to this recipient
+                success, message = sender.send_templated_email(
+                    smtp_config=smtp_config,
+                    email_template=template,
+                    recipient_email=email,
+                    template_variables=template_variables,
+                    recipient_name=recipient_name
+                )
+
+                if success:
+                    successful_sends.append(email)
+                else:
+                    failed_sends.append(f"{email}: {message}")
+
+            # Provide feedback based on results
+            if successful_sends and not failed_sends:
+                if len(successful_sends) == 1:
+                    flash('Email sent successfully!', 'success')
+                else:
+                    flash(f'All {len(successful_sends)} emails sent successfully!', 'success')
                 return redirect(url_for('main.send_manual_email'))
+            elif successful_sends and failed_sends:
+                flash(f'Successfully sent to {len(successful_sends)} recipients: {", ".join(successful_sends)}', 'success')
+                flash(f'Failed to send to {len(failed_sends)} recipients: {"; ".join(failed_sends)}', 'error')
             else:
-                flash(f'Failed to send email: {message}', 'error')
+                flash(f'Failed to send all emails: {"; ".join(failed_sends)}', 'error')
 
         except Exception as e:
             flash(f'Error sending email: {str(e)}', 'error')

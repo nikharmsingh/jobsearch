@@ -58,32 +58,51 @@
                             <i class="bi bi-person me-2"></i>Recipient Information
                         </h6>
                         
-                        <div class="row">
-                            <div class="col-md-8">
-                                <div class="mb-3">
-                                    {{ form.hr_email.label(class="form-label") }}
-                                    {{ form.hr_email(class="form-control" + (" is-invalid" if form.hr_email.errors else ""), placeholder="recipient@company.com") }}
-                                    {% if form.hr_email.errors %}
-                                        <div class="invalid-feedback">
-                                            {% for error in form.hr_email.errors %}
-                                                {{ error }}
-                                            {% endfor %}
-                                        </div>
-                                    {% endif %}
-                                </div>
+                        <!-- Email Recipients Section -->
+                        <div class="mb-3">
+                            {{ form.hr_email.label(class="form-label") }}
+                            <div class="input-group">
+                                <span class="input-group-text">
+                                    <i class="bi bi-envelope-at"></i>
+                                </span>
+                                {{ form.hr_email(class="form-control" + (" is-invalid" if form.hr_email.errors else "")) }}
                             </div>
-                            <div class="col-md-4">
-                                <div class="mb-3">
-                                    {{ form.hr_name.label(class="form-label") }}
-                                    {{ form.hr_name(class="form-control" + (" is-invalid" if form.hr_name.errors else ""), placeholder="John Doe") }}
-                                    {% if form.hr_name.errors %}
-                                        <div class="invalid-feedback">
-                                            {% for error in form.hr_name.errors %}
-                                                {{ error }}
-                                            {% endfor %}
-                                        </div>
-                                    {% endif %}
+                            {% if form.hr_email.errors %}
+                                <div class="invalid-feedback d-block">
+                                    {% for error in form.hr_email.errors %}
+                                        {{ error }}
+                                    {% endfor %}
                                 </div>
+                            {% endif %}
+                            <div class="form-text">
+                                <i class="bi bi-info-circle me-1"></i>
+                                <strong>Multiple emails supported:</strong> Enter one or more email addresses separated by commas or semicolons.
+                                <br>
+                                <strong>Examples:</strong>
+                                <code>hr@company.com</code> or
+                                <code>hr@company.com, recruiter@company.com</code>
+                            </div>
+                        </div>
+
+                        <!-- Recipient Names Section -->
+                        <div class="mb-3">
+                            {{ form.hr_name.label(class="form-label") }}
+                            <div class="input-group">
+                                <span class="input-group-text">
+                                    <i class="bi bi-person"></i>
+                                </span>
+                                {{ form.hr_name(class="form-control" + (" is-invalid" if form.hr_name.errors else "")) }}
+                            </div>
+                            {% if form.hr_name.errors %}
+                                <div class="invalid-feedback d-block">
+                                    {% for error in form.hr_name.errors %}
+                                        {{ error }}
+                                    {% endfor %}
+                                </div>
+                            {% endif %}
+                            <div class="form-text">
+                                <i class="bi bi-info-circle me-1"></i>
+                                Optional: Enter recipient names in the same order as emails, separated by commas.
                             </div>
                         </div>
                         
@@ -170,9 +189,15 @@
                             
                             <h6>Recipient Information</h6>
                             <ul class="list-unstyled">
-                                <li><code>{hr_name}</code> - Recipient name</li>
-                                <li><code>{hr_email}</code> - Recipient email</li>
+                                <li><code>{hr_name}</code> - Recipient name (individual for each email)</li>
+                                <li><code>{hr_email}</code> - Recipient email (individual for each email)</li>
                             </ul>
+                            <div class="alert alert-info py-2 px-3 mt-2">
+                                <small>
+                                    <i class="bi bi-lightbulb me-1"></i>
+                                    <strong>Multiple Recipients:</strong> When sending to multiple emails, each recipient gets a personalized email with their individual name and email in the template variables.
+                                </small>
+                            </div>
                         </div>
                         <div class="col-md-6">
                             <h6>Your Information</h6>
@@ -226,14 +251,78 @@ document.addEventListener('DOMContentLoaded', function() {
     if (emailField) {
         emailField.focus();
     }
-    
+
+    // Email counter and validation
+    function updateEmailCounter() {
+        if (!emailField) return;
+
+        const emailText = emailField.value.trim();
+        if (!emailText) {
+            updateCounterDisplay(0);
+            return;
+        }
+
+        // Split by comma or semicolon and count valid emails
+        const emails = emailText.split(/[,;]/).map(e => e.trim()).filter(e => e);
+        const validEmails = emails.filter(email => {
+            const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+            return emailRegex.test(email);
+        });
+
+        updateCounterDisplay(emails.length, validEmails.length);
+    }
+
+    function updateCounterDisplay(totalCount, validCount = null) {
+        let counterElement = document.getElementById('email-counter');
+        if (!counterElement) {
+            // Create counter element
+            counterElement = document.createElement('div');
+            counterElement.id = 'email-counter';
+            counterElement.className = 'mt-2';
+            emailField.parentNode.appendChild(counterElement);
+        }
+
+        if (totalCount === 0) {
+            counterElement.innerHTML = '';
+            return;
+        }
+
+        let badgeClass = 'bg-secondary';
+        let message = `${totalCount} email${totalCount > 1 ? 's' : ''}`;
+
+        if (validCount !== null) {
+            if (validCount === totalCount && validCount > 0) {
+                badgeClass = 'bg-success';
+                message += ' (all valid)';
+            } else if (validCount > 0) {
+                badgeClass = 'bg-warning';
+                message = `${validCount}/${totalCount} valid emails`;
+            } else {
+                badgeClass = 'bg-danger';
+                message += ' (none valid)';
+            }
+        }
+
+        counterElement.innerHTML = `<span class="badge ${badgeClass}">${message}</span>`;
+    }
+
+    // Add event listeners for email field
+    if (emailField) {
+        emailField.addEventListener('input', updateEmailCounter);
+        emailField.addEventListener('blur', updateEmailCounter);
+        // Initial count
+        updateEmailCounter();
+    }
+
     // Form validation feedback
     const form = document.querySelector('form');
     if (form) {
         form.addEventListener('submit', function(e) {
             const submitBtn = form.querySelector('button[type="submit"]');
             if (submitBtn) {
-                submitBtn.innerHTML = '<span class="spinner-border spinner-border-sm me-2" role="status"></span>Sending...';
+                const emailCount = emailField.value.split(/[,;]/).filter(e => e.trim()).length;
+                const buttonText = emailCount > 1 ? `Sending to ${emailCount} recipients...` : 'Sending...';
+                submitBtn.innerHTML = `<span class="spinner-border spinner-border-sm me-2" role="status"></span>${buttonText}`;
                 submitBtn.disabled = true;
             }
         });
