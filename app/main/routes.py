@@ -286,3 +286,60 @@ def job_searches():
         .paginate(page=page, per_page=10, error_out=False)
 
     return render_template('main/job_searches.html', title='Job Searches', searches=searches)
+
+@bp.route('/send-manual-email', methods=['GET', 'POST'])
+@login_required
+def send_manual_email():
+    """Manual email sending page"""
+    form = SendEmailForm(user_id=current_user.id)
+
+    if form.validate_on_submit():
+        # Get template and SMTP config
+        template = EmailTemplate.query.filter_by(
+            id=form.template_id.data,
+            user_id=current_user.id
+        ).first()
+
+        smtp_config = SMTPConfig.query.filter_by(
+            id=form.smtp_config_id.data,
+            user_id=current_user.id
+        ).first()
+
+        if not template:
+            flash('Email template not found.', 'error')
+            return render_template('main/send_manual_email.html', title='Send Manual Email', form=form)
+
+        if not smtp_config:
+            flash('SMTP configuration not found.', 'error')
+            return render_template('main/send_manual_email.html', title='Send Manual Email', form=form)
+
+        try:
+            # Prepare template variables
+            template_variables = {
+                'company_name': form.company_name.data or '',
+                'company_domain': form.company_domain.data or '',
+                'position': form.position.data or '',
+                'hr_name': form.hr_name.data or '',
+                'user_phone': getattr(current_user, 'phone', '') or ''
+            }
+
+            # Send email
+            sender = EmailSender()
+            success, message = sender.send_templated_email(
+                smtp_config=smtp_config,
+                email_template=template,
+                recipient_email=form.hr_email.data,
+                template_variables=template_variables,
+                recipient_name=form.hr_name.data
+            )
+
+            if success:
+                flash('Email sent successfully!', 'success')
+                return redirect(url_for('main.send_manual_email'))
+            else:
+                flash(f'Failed to send email: {message}', 'error')
+
+        except Exception as e:
+            flash(f'Error sending email: {str(e)}', 'error')
+
+    return render_template('main/send_manual_email.html', title='Send Manual Email', form=form)

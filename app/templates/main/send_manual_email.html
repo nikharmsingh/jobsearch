@@ -1,0 +1,243 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container py-4">
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h1 class="h3 mb-0">
+                    <i class="bi bi-envelope-plus me-2"></i>{{ title }}
+                </h1>
+                <a href="{{ url_for('main.dashboard') }}" class="btn btn-outline-secondary">
+                    <i class="bi bi-arrow-left me-2"></i>Back to Dashboard
+                </a>
+            </div>
+
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0">
+                        <i class="bi bi-send me-2"></i>Send Templated Email
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <form method="POST">
+                        {{ form.hidden_tag() }}
+                        
+                        <!-- Email Template Selection -->
+                        <div class="mb-3">
+                            {{ form.template_id.label(class="form-label") }}
+                            {{ form.template_id(class="form-select" + (" is-invalid" if form.template_id.errors else "")) }}
+                            {% if form.template_id.errors %}
+                                <div class="invalid-feedback">
+                                    {% for error in form.template_id.errors %}
+                                        {{ error }}
+                                    {% endfor %}
+                                </div>
+                            {% endif %}
+                            <div class="form-text">Choose the email template to use for this email</div>
+                        </div>
+                        
+                        <!-- SMTP Configuration Selection -->
+                        <div class="mb-3">
+                            {{ form.smtp_config_id.label(class="form-label") }}
+                            {{ form.smtp_config_id(class="form-select" + (" is-invalid" if form.smtp_config_id.errors else "")) }}
+                            {% if form.smtp_config_id.errors %}
+                                <div class="invalid-feedback">
+                                    {% for error in form.smtp_config_id.errors %}
+                                        {{ error }}
+                                    {% endfor %}
+                                </div>
+                            {% endif %}
+                            <div class="form-text">Select the SMTP configuration to send the email from</div>
+                        </div>
+                        
+                        <hr class="my-4">
+                        
+                        <!-- Recipient Information -->
+                        <h6 class="mb-3">
+                            <i class="bi bi-person me-2"></i>Recipient Information
+                        </h6>
+                        
+                        <div class="row">
+                            <div class="col-md-8">
+                                <div class="mb-3">
+                                    {{ form.hr_email.label(class="form-label") }}
+                                    {{ form.hr_email(class="form-control" + (" is-invalid" if form.hr_email.errors else ""), placeholder="recipient@company.com") }}
+                                    {% if form.hr_email.errors %}
+                                        <div class="invalid-feedback">
+                                            {% for error in form.hr_email.errors %}
+                                                {{ error }}
+                                            {% endfor %}
+                                        </div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="mb-3">
+                                    {{ form.hr_name.label(class="form-label") }}
+                                    {{ form.hr_name(class="form-control" + (" is-invalid" if form.hr_name.errors else ""), placeholder="John Doe") }}
+                                    {% if form.hr_name.errors %}
+                                        <div class="invalid-feedback">
+                                            {% for error in form.hr_name.errors %}
+                                                {{ error }}
+                                            {% endfor %}
+                                        </div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <hr class="my-4">
+                        
+                        <!-- Company Information -->
+                        <h6 class="mb-3">
+                            <i class="bi bi-building me-2"></i>Company Information
+                        </h6>
+                        
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    {{ form.company_name.label(class="form-label") }}
+                                    {{ form.company_name(class="form-control" + (" is-invalid" if form.company_name.errors else ""), placeholder="Company Name") }}
+                                    {% if form.company_name.errors %}
+                                        <div class="invalid-feedback">
+                                            {% for error in form.company_name.errors %}
+                                                {{ error }}
+                                            {% endfor %}
+                                        </div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    {{ form.company_domain.label(class="form-label") }}
+                                    {{ form.company_domain(class="form-control" + (" is-invalid" if form.company_domain.errors else ""), placeholder="company.com") }}
+                                    {% if form.company_domain.errors %}
+                                        <div class="invalid-feedback">
+                                            {% for error in form.company_domain.errors %}
+                                                {{ error }}
+                                            {% endfor %}
+                                        </div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="mb-3">
+                            {{ form.position.label(class="form-label") }}
+                            {{ form.position(class="form-control" + (" is-invalid" if form.position.errors else ""), placeholder="Software Engineer") }}
+                            {% if form.position.errors %}
+                                <div class="invalid-feedback">
+                                    {% for error in form.position.errors %}
+                                        {{ error }}
+                                    {% endfor %}
+                                </div>
+                            {% endif %}
+                        </div>
+                        
+                        <div class="d-flex justify-content-between align-items-center mt-4">
+                            <div>
+                                <small class="text-muted">
+                                    <i class="bi bi-info-circle me-1"></i>
+                                    Template variables will be automatically replaced with the information provided above
+                                </small>
+                            </div>
+                            <div>
+                                <a href="{{ url_for('main.dashboard') }}" class="btn btn-secondary me-2">Cancel</a>
+                                {{ form.submit(class="btn btn-primary") }}
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <!-- Template Variables Reference -->
+            <div class="card mt-4">
+                <div class="card-header">
+                    <h6 class="mb-0">
+                        <i class="bi bi-info-circle me-2"></i>Available Template Variables
+                    </h6>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <h6>Company Information</h6>
+                            <ul class="list-unstyled">
+                                <li><code>{company_name}</code> - Company name</li>
+                                <li><code>{company_domain}</code> - Company website</li>
+                                <li><code>{position}</code> - Job position</li>
+                            </ul>
+                            
+                            <h6>Recipient Information</h6>
+                            <ul class="list-unstyled">
+                                <li><code>{hr_name}</code> - Recipient name</li>
+                                <li><code>{hr_email}</code> - Recipient email</li>
+                            </ul>
+                        </div>
+                        <div class="col-md-6">
+                            <h6>Your Information</h6>
+                            <ul class="list-unstyled">
+                                <li><code>{user_name}</code> - Your full name</li>
+                                <li><code>{user_email}</code> - Your email address</li>
+                                <li><code>{user_phone}</code> - Your phone number</li>
+                            </ul>
+                            
+                            <h6>Other</h6>
+                            <ul class="list-unstyled">
+                                <li><code>{current_date}</code> - Current date</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Quick Actions -->
+            <div class="card mt-4">
+                <div class="card-header">
+                    <h6 class="mb-0">
+                        <i class="bi bi-lightning me-2"></i>Quick Actions
+                    </h6>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <a href="{{ url_for('main.new_template') }}" class="btn btn-outline-primary w-100 mb-2">
+                                <i class="bi bi-plus-circle me-2"></i>Create New Template
+                            </a>
+                        </div>
+                        <div class="col-md-6">
+                            <a href="{{ url_for('main.smtp_configs') }}" class="btn btn-outline-secondary w-100 mb-2">
+                                <i class="bi bi-gear me-2"></i>Manage SMTP Configs
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Auto-focus on email field
+    const emailField = document.getElementById('hr_email');
+    if (emailField) {
+        emailField.focus();
+    }
+    
+    // Form validation feedback
+    const form = document.querySelector('form');
+    if (form) {
+        form.addEventListener('submit', function(e) {
+            const submitBtn = form.querySelector('button[type="submit"]');
+            if (submitBtn) {
+                submitBtn.innerHTML = '<span class="spinner-border spinner-border-sm me-2" role="status"></span>Sending...';
+                submitBtn.disabled = true;
+            }
+        });
+    }
+});
+</script>
+{% endblock %}
