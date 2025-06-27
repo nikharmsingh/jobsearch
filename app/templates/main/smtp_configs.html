@@ -1,0 +1,182 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container py-4">
+    <div class="row">
+        <div class="col-12">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h1 class="h3 mb-0">SMTP Configurations</h1>
+                <a href="{{ url_for('main.new_smtp_config') }}" class="btn btn-primary">
+                    <i class="bi bi-plus-circle me-2"></i>New Configuration
+                </a>
+            </div>
+        </div>
+    </div>
+
+    {% if configs %}
+        <div class="row g-4">
+            {% for config in configs %}
+                <div class="col-lg-6">
+                    <div class="card h-100">
+                        <div class="card-header d-flex justify-content-between align-items-center">
+                            <h5 class="mb-0">
+                                {{ config.name }}
+                                {% if config.is_active %}
+                                    <span class="badge bg-success ms-2">Active</span>
+                                {% endif %}
+                            </h5>
+                            <div class="dropdown">
+                                <button class="btn btn-sm btn-outline-secondary dropdown-toggle" type="button" data-bs-toggle="dropdown">
+                                    <i class="bi bi-three-dots"></i>
+                                </button>
+                                <ul class="dropdown-menu">
+                                    <li><a class="dropdown-item" href="{{ url_for('main.edit_smtp_config', id=config.id) }}">
+                                        <i class="bi bi-pencil me-2"></i>Edit
+                                    </a></li>
+                                    <li><button class="dropdown-item test-smtp-btn" data-config-id="{{ config.id }}">
+                                        <i class="bi bi-wifi me-2"></i>Test Connection
+                                    </button></li>
+                                    <li><button class="dropdown-item send-test-email-btn" data-config-id="{{ config.id }}">
+                                        <i class="bi bi-envelope me-2"></i>Send Test Email
+                                    </button></li>
+                                    <li><hr class="dropdown-divider"></li>
+                                    <li>
+                                        <form method="POST" action="{{ url_for('main.delete_smtp_config', id=config.id) }}" class="d-inline">
+                                            <button type="submit" class="dropdown-item text-danger" 
+                                                    onclick="return confirm('Are you sure you want to delete this SMTP configuration?')">
+                                                <i class="bi bi-trash me-2"></i>Delete
+                                            </button>
+                                        </form>
+                                    </li>
+                                </ul>
+                            </div>
+                        </div>
+                        <div class="card-body">
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <p class="mb-1"><strong>Server:</strong> {{ config.smtp_server }}</p>
+                                    <p class="mb-1"><strong>Port:</strong> {{ config.smtp_port }}</p>
+                                    <p class="mb-1"><strong>Username:</strong> {{ config.username }}</p>
+                                </div>
+                                <div class="col-md-6">
+                                    <p class="mb-1"><strong>From Email:</strong> {{ config.from_email }}</p>
+                                    {% if config.from_name %}
+                                        <p class="mb-1"><strong>From Name:</strong> {{ config.from_name }}</p>
+                                    {% endif %}
+                                    <p class="mb-1">
+                                        <strong>Security:</strong>
+                                        {% if config.use_ssl %}
+                                            SSL
+                                        {% elif config.use_tls %}
+                                            TLS
+                                        {% else %}
+                                            None
+                                        {% endif %}
+                                    </p>
+                                </div>
+                            </div>
+                            
+                            <div class="mt-3">
+                                <div class="smtp-status {{ 'verified' if config.is_verified else 'unverified' }}">
+                                    <i class="bi bi-{{ 'check-circle' if config.is_verified else 'exclamation-triangle' }} me-1"></i>
+                                    {{ 'Verified' if config.is_verified else 'Not Verified' }}
+                                </div>
+                            </div>
+                            
+                            <div class="mt-3">
+                                <small class="text-muted">
+                                    Created: {{ config.created_at.strftime('%B %d, %Y') }}
+                                    {% if config.updated_at != config.created_at %}
+                                        | Updated: {{ config.updated_at.strftime('%B %d, %Y') }}
+                                    {% endif %}
+                                </small>
+                            </div>
+                        </div>
+                        <div class="card-footer">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <div>
+                                    <button class="btn btn-sm btn-outline-primary test-smtp-btn" data-config-id="{{ config.id }}">
+                                        <i class="bi bi-wifi me-1"></i>Test
+                                    </button>
+                                    <button class="btn btn-sm btn-outline-secondary send-test-email-btn" data-config-id="{{ config.id }}">
+                                        <i class="bi bi-envelope me-1"></i>Test Email
+                                    </button>
+                                </div>
+                                <a href="{{ url_for('main.edit_smtp_config', id=config.id) }}" class="btn btn-sm btn-outline-primary">
+                                    <i class="bi bi-pencil me-1"></i>Edit
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
+    {% else %}
+        <div class="row">
+            <div class="col-12">
+                <div class="card">
+                    <div class="card-body text-center py-5">
+                        <i class="bi bi-server display-4 text-muted mb-3"></i>
+                        <h4 class="text-muted">No SMTP Configurations</h4>
+                        <p class="text-muted mb-4">Configure your email server settings to start sending job application emails.</p>
+                        <a href="{{ url_for('main.new_smtp_config') }}" class="btn btn-primary">
+                            <i class="bi bi-plus-circle me-2"></i>Add Your First SMTP Configuration
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    {% endif %}
+
+    <!-- SMTP Setup Help -->
+    <div class="row mt-4">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <h6 class="mb-0">
+                        <i class="bi bi-info-circle me-2"></i>Common SMTP Settings
+                    </h6>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-4">
+                            <h6>Gmail</h6>
+                            <ul class="list-unstyled small">
+                                <li><strong>Server:</strong> smtp.gmail.com</li>
+                                <li><strong>Port:</strong> 587 (TLS) or 465 (SSL)</li>
+                                <li><strong>Security:</strong> TLS or SSL</li>
+                                <li><strong>Note:</strong> Use App Password, not regular password</li>
+                            </ul>
+                        </div>
+                        <div class="col-md-4">
+                            <h6>Outlook/Hotmail</h6>
+                            <ul class="list-unstyled small">
+                                <li><strong>Server:</strong> smtp-mail.outlook.com</li>
+                                <li><strong>Port:</strong> 587</li>
+                                <li><strong>Security:</strong> TLS</li>
+                                <li><strong>Username:</strong> Full email address</li>
+                            </ul>
+                        </div>
+                        <div class="col-md-4">
+                            <h6>Yahoo Mail</h6>
+                            <ul class="list-unstyled small">
+                                <li><strong>Server:</strong> smtp.mail.yahoo.com</li>
+                                <li><strong>Port:</strong> 587 or 465</li>
+                                <li><strong>Security:</strong> TLS or SSL</li>
+                                <li><strong>Note:</strong> Enable "Less secure app access"</li>
+                            </ul>
+                        </div>
+                    </div>
+                    
+                    <div class="alert alert-info mt-3">
+                        <i class="bi bi-info-circle me-2"></i>
+                        <strong>Security Tip:</strong> For Gmail and other providers, use App Passwords instead of your regular password for better security.
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div id="alert-container"></div>
+{% endblock %}

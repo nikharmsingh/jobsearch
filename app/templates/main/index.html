@@ -1,0 +1,182 @@
+{% extends "base.html" %}
+
+{% block content %}
+<!-- Hero Section -->
+<section class="hero-section">
+    <div class="container">
+        <div class="row align-items-center">
+            <div class="col-lg-6">
+                <h1 class="display-4 fw-bold">Find HR Contacts & Send Professional Emails</h1>
+                <p class="lead">Streamline your job search with automated company research, HR contact discovery, and personalized email outreach.</p>
+                <div class="mt-4">
+                    {% if not current_user.is_authenticated %}
+                        <a href="{{ url_for('auth.register') }}" class="btn btn-light btn-lg me-3">Get Started</a>
+                        <a href="{{ url_for('auth.login') }}" class="btn btn-outline-light btn-lg">Login</a>
+                    {% else %}
+                        <a href="{{ url_for('main.dashboard') }}" class="btn btn-light btn-lg me-3">Go to Dashboard</a>
+                        <a href="{{ url_for('main.search') }}" class="btn btn-outline-light btn-lg">Start Searching</a>
+                    {% endif %}
+                </div>
+            </div>
+            <div class="col-lg-6 text-center">
+                <i class="bi bi-search display-1 text-white opacity-75"></i>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Features Section -->
+<section class="py-5">
+    <div class="container">
+        <div class="row text-center mb-5">
+            <div class="col-lg-8 mx-auto">
+                <h2 class="display-5 fw-bold">Everything You Need for Job Search</h2>
+                <p class="lead text-muted">Powerful tools to help you find the right contacts and send professional emails</p>
+            </div>
+        </div>
+        
+        <div class="row g-4">
+            <div class="col-md-4">
+                <div class="card feature-card h-100">
+                    <div class="card-body">
+                        <div class="feature-icon">
+                            <i class="bi bi-building"></i>
+                        </div>
+                        <h4>Company Domain Finder</h4>
+                        <p class="text-muted">Automatically discover company websites and domains using advanced search algorithms and APIs.</p>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-md-4">
+                <div class="card feature-card h-100">
+                    <div class="card-body">
+                        <div class="feature-icon">
+                            <i class="bi bi-person-lines-fill"></i>
+                        </div>
+                        <h4>HR Contact Discovery</h4>
+                        <p class="text-muted">Find HR professionals and recruiters using LinkedIn search and email pattern matching.</p>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-md-4">
+                <div class="card feature-card h-100">
+                    <div class="card-body">
+                        <div class="feature-icon">
+                            <i class="bi bi-envelope-heart"></i>
+                        </div>
+                        <h4>Email Templates</h4>
+                        <p class="text-muted">Create and manage professional email templates with dynamic variables for personalization.</p>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-md-4">
+                <div class="card feature-card h-100">
+                    <div class="card-body">
+                        <div class="feature-icon">
+                            <i class="bi bi-server"></i>
+                        </div>
+                        <h4>SMTP Configuration</h4>
+                        <p class="text-muted">Configure your own email servers (Gmail, Outlook, etc.) for sending personalized emails.</p>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-md-4">
+                <div class="card feature-card h-100">
+                    <div class="card-body">
+                        <div class="feature-icon">
+                            <i class="bi bi-graph-up"></i>
+                        </div>
+                        <h4>Progress Tracking</h4>
+                        <p class="text-muted">Track your job applications, email responses, and manage your job search pipeline.</p>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-md-4">
+                <div class="card feature-card h-100">
+                    <div class="card-body">
+                        <div class="feature-icon">
+                            <i class="bi bi-shield-check"></i>
+                        </div>
+                        <h4>Secure & Private</h4>
+                        <p class="text-muted">Your data is encrypted and secure. We respect your privacy and never share your information.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- How It Works Section -->
+<section class="py-5 bg-light">
+    <div class="container">
+        <div class="row text-center mb-5">
+            <div class="col-lg-8 mx-auto">
+                <h2 class="display-5 fw-bold">How It Works</h2>
+                <p class="lead text-muted">Simple 4-step process to streamline your job search</p>
+            </div>
+        </div>
+        
+        <div class="row g-4">
+            <div class="col-md-3 text-center">
+                <div class="mb-3">
+                    <div class="bg-primary text-white rounded-circle d-inline-flex align-items-center justify-content-center" style="width: 60px; height: 60px;">
+                        <span class="fw-bold fs-4">1</span>
+                    </div>
+                </div>
+                <h5>Enter Company Name</h5>
+                <p class="text-muted">Start by entering the company name you want to apply to</p>
+            </div>
+            
+            <div class="col-md-3 text-center">
+                <div class="mb-3">
+                    <div class="bg-primary text-white rounded-circle d-inline-flex align-items-center justify-content-center" style="width: 60px; height: 60px;">
+                        <span class="fw-bold fs-4">2</span>
+                    </div>
+                </div>
+                <h5>Find HR Contacts</h5>
+                <p class="text-muted">Our system automatically finds HR professionals and their email addresses</p>
+            </div>
+            
+            <div class="col-md-3 text-center">
+                <div class="mb-3">
+                    <div class="bg-primary text-white rounded-circle d-inline-flex align-items-center justify-content-center" style="width: 60px; height: 60px;">
+                        <span class="fw-bold fs-4">3</span>
+                    </div>
+                </div>
+                <h5>Customize Email</h5>
+                <p class="text-muted">Choose from professional templates and personalize your message</p>
+            </div>
+            
+            <div class="col-md-3 text-center">
+                <div class="mb-3">
+                    <div class="bg-primary text-white rounded-circle d-inline-flex align-items-center justify-content-center" style="width: 60px; height: 60px;">
+                        <span class="fw-bold fs-4">4</span>
+                    </div>
+                </div>
+                <h5>Send & Track</h5>
+                <p class="text-muted">Send your email and track responses in your dashboard</p>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- CTA Section -->
+{% if not current_user.is_authenticated %}
+<section class="py-5">
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-8 mx-auto text-center">
+                <h2 class="display-5 fw-bold">Ready to Accelerate Your Job Search?</h2>
+                <p class="lead text-muted mb-4">Join thousands of job seekers who have streamlined their application process</p>
+                <a href="{{ url_for('auth.register') }}" class="btn btn-primary btn-lg">Get Started for Free</a>
+            </div>
+        </div>
+    </div>
+</section>
+{% endif %}
+{% endblock %}

@@ -1,0 +1,169 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container py-4">
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h1 class="h3 mb-0">{{ title }}</h1>
+                <a href="{{ url_for('main.templates') }}" class="btn btn-outline-secondary">
+                    <i class="bi bi-arrow-left me-2"></i>Back to Templates
+                </a>
+            </div>
+
+            <div class="card">
+                <div class="card-body">
+                    <form method="POST">
+                        {{ form.hidden_tag() }}
+                        
+                        <div class="mb-3">
+                            {{ form.name.label(class="form-label") }}
+                            {{ form.name(class="form-control" + (" is-invalid" if form.name.errors else "")) }}
+                            {% if form.name.errors %}
+                                <div class="invalid-feedback">
+                                    {% for error in form.name.errors %}
+                                        {{ error }}
+                                    {% endfor %}
+                                </div>
+                            {% endif %}
+                            <div class="form-text">Give your template a descriptive name</div>
+                        </div>
+                        
+                        <div class="mb-3">
+                            {{ form.subject.label(class="form-label") }}
+                            {{ form.subject(class="form-control" + (" is-invalid" if form.subject.errors else "")) }}
+                            {% if form.subject.errors %}
+                                <div class="invalid-feedback">
+                                    {% for error in form.subject.errors %}
+                                        {{ error }}
+                                    {% endfor %}
+                                </div>
+                            {% endif %}
+                            <div class="form-text">Use variables like {company_name} and {position} for personalization</div>
+                        </div>
+                        
+                        <div class="mb-3">
+                            {{ form.body.label(class="form-label") }}
+                            {{ form.body(class="form-control" + (" is-invalid" if form.body.errors else ""), rows="12") }}
+                            {% if form.body.errors %}
+                                <div class="invalid-feedback">
+                                    {% for error in form.body.errors %}
+                                        {{ error }}
+                                    {% endfor %}
+                                </div>
+                            {% endif %}
+                            <div class="form-text">Write your email body using template variables for personalization</div>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <div class="form-check">
+                                {{ form.is_default(class="form-check-input") }}
+                                {{ form.is_default.label(class="form-check-label") }}
+                            </div>
+                            <div class="form-text">Default templates are automatically selected when sending emails</div>
+                        </div>
+                        
+                        <div class="d-flex justify-content-between">
+                            <a href="{{ url_for('main.templates') }}" class="btn btn-secondary">Cancel</a>
+                            {{ form.submit(class="btn btn-primary") }}
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <!-- Template Variables Reference -->
+            <div class="card mt-4">
+                <div class="card-header">
+                    <h6 class="mb-0">
+                        <i class="bi bi-info-circle me-2"></i>Template Variables Reference
+                    </h6>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <h6>Company Information</h6>
+                            <ul class="list-unstyled">
+                                <li><code>{company_name}</code> - Company name</li>
+                                <li><code>{company_domain}</code> - Company website</li>
+                                <li><code>{position}</code> - Job position</li>
+                            </ul>
+                            
+                            <h6>HR Contact</h6>
+                            <ul class="list-unstyled">
+                                <li><code>{hr_name}</code> - HR contact name</li>
+                                <li><code>{hr_email}</code> - HR contact email</li>
+                            </ul>
+                        </div>
+                        <div class="col-md-6">
+                            <h6>Your Information</h6>
+                            <ul class="list-unstyled">
+                                <li><code>{user_name}</code> - Your full name</li>
+                                <li><code>{user_email}</code> - Your email address</li>
+                            </ul>
+                            
+                            <h6>Other</h6>
+                            <ul class="list-unstyled">
+                                <li><code>{date}</code> - Current date</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Template Preview -->
+            {% if template %}
+                <div class="card mt-4">
+                    <div class="card-header">
+                        <h6 class="mb-0">
+                            <i class="bi bi-eye me-2"></i>Current Template Preview
+                        </h6>
+                    </div>
+                    <div class="card-body">
+                        <div class="email-preview">
+                            <div class="email-header">
+                                <div class="email-subject">{{ template.subject }}</div>
+                                <div class="email-meta">Subject Line</div>
+                            </div>
+                            <div class="email-body">
+                                {{ template.body|replace('\n', '<br>')|safe }}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            {% endif %}
+
+            <!-- Sample Template -->
+            <div class="card mt-4">
+                <div class="card-header">
+                    <h6 class="mb-0">
+                        <i class="bi bi-lightbulb me-2"></i>Sample Template
+                    </h6>
+                </div>
+                <div class="card-body">
+                    <h6>Subject:</h6>
+                    <div class="template-preview mb-3">
+                        Application for {position} Position at {company_name}
+                    </div>
+                    
+                    <h6>Body:</h6>
+                    <div class="template-preview">
+Dear {hr_name},
+
+I hope this email finds you well. I am writing to express my strong interest in the {position} position at {company_name}.
+
+With my background and skills, I believe I would be a valuable addition to your team. I am particularly drawn to {company_name} because of your reputation for innovation and excellence in the industry.
+
+I have attached my resume for your review and would welcome the opportunity to discuss how my experience and enthusiasm can contribute to your team's success.
+
+Thank you for considering my application. I look forward to hearing from you soon.
+
+Best regards,
+{user_name}
+{user_email}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

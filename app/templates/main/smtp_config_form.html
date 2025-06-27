@@ -1,0 +1,253 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container py-4">
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h1 class="h3 mb-0">{{ title }}</h1>
+                <a href="{{ url_for('main.smtp_configs') }}" class="btn btn-outline-secondary">
+                    <i class="bi bi-arrow-left me-2"></i>Back to SMTP Configs
+                </a>
+            </div>
+
+            <div class="card">
+                <div class="card-body">
+                    <form method="POST">
+                        {{ form.hidden_tag() }}
+                        
+                        <div class="mb-3">
+                            {{ form.name.label(class="form-label") }}
+                            {{ form.name(class="form-control" + (" is-invalid" if form.name.errors else "")) }}
+                            {% if form.name.errors %}
+                                <div class="invalid-feedback">
+                                    {% for error in form.name.errors %}
+                                        {{ error }}
+                                    {% endfor %}
+                                </div>
+                            {% endif %}
+                            <div class="form-text">Give this configuration a descriptive name (e.g., "Gmail Personal", "Work Email")</div>
+                        </div>
+                        
+                        <div class="row">
+                            <div class="col-md-8">
+                                <div class="mb-3">
+                                    {{ form.smtp_server.label(class="form-label") }}
+                                    {{ form.smtp_server(class="form-control" + (" is-invalid" if form.smtp_server.errors else "")) }}
+                                    {% if form.smtp_server.errors %}
+                                        <div class="invalid-feedback">
+                                            {% for error in form.smtp_server.errors %}
+                                                {{ error }}
+                                            {% endfor %}
+                                        </div>
+                                    {% endif %}
+                                    <div class="form-text">e.g., smtp.gmail.com, smtp-mail.outlook.com</div>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="mb-3">
+                                    {{ form.smtp_port.label(class="form-label") }}
+                                    {{ form.smtp_port(class="form-control" + (" is-invalid" if form.smtp_port.errors else "")) }}
+                                    {% if form.smtp_port.errors %}
+                                        <div class="invalid-feedback">
+                                            {% for error in form.smtp_port.errors %}
+                                                {{ error }}
+                                            {% endfor %}
+                                        </div>
+                                    {% endif %}
+                                    <div class="form-text">Usually 587 (TLS) or 465 (SSL)</div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <div class="form-check">
+                                        {{ form.use_tls(class="form-check-input") }}
+                                        {{ form.use_tls.label(class="form-check-label") }}
+                                    </div>
+                                    <div class="form-text">Recommended for most providers (port 587)</div>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <div class="form-check">
+                                        {{ form.use_ssl(class="form-check-input") }}
+                                        {{ form.use_ssl.label(class="form-check-label") }}
+                                    </div>
+                                    <div class="form-text">Alternative to TLS (port 465)</div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="mb-3">
+                            {{ form.username.label(class="form-label") }}
+                            {{ form.username(class="form-control" + (" is-invalid" if form.username.errors else "")) }}
+                            {% if form.username.errors %}
+                                <div class="invalid-feedback">
+                                    {% for error in form.username.errors %}
+                                        {{ error }}
+                                    {% endfor %}
+                                </div>
+                            {% endif %}
+                            <div class="form-text">Usually your full email address</div>
+                        </div>
+                        
+                        <div class="mb-3">
+                            {{ form.password.label(class="form-label") }}
+                            {{ form.password(class="form-control" + (" is-invalid" if form.password.errors else "")) }}
+                            {% if form.password.errors %}
+                                <div class="invalid-feedback">
+                                    {% for error in form.password.errors %}
+                                        {{ error }}
+                                    {% endfor %}
+                                </div>
+                            {% endif %}
+                            <div class="form-text">
+                                {% if config %}
+                                    Leave blank to keep current password. 
+                                {% endif %}
+                                For Gmail, use an App Password instead of your regular password.
+                            </div>
+                        </div>
+                        
+                        <div class="mb-3">
+                            {{ form.from_email.label(class="form-label") }}
+                            {{ form.from_email(class="form-control" + (" is-invalid" if form.from_email.errors else "")) }}
+                            {% if form.from_email.errors %}
+                                <div class="invalid-feedback">
+                                    {% for error in form.from_email.errors %}
+                                        {{ error }}
+                                    {% endfor %}
+                                </div>
+                            {% endif %}
+                            <div class="form-text">Email address that will appear in the "From" field</div>
+                        </div>
+                        
+                        <div class="mb-3">
+                            {{ form.from_name.label(class="form-label") }}
+                            {{ form.from_name(class="form-control" + (" is-invalid" if form.from_name.errors else "")) }}
+                            {% if form.from_name.errors %}
+                                <div class="invalid-feedback">
+                                    {% for error in form.from_name.errors %}
+                                        {{ error }}
+                                    {% endfor %}
+                                </div>
+                            {% endif %}
+                            <div class="form-text">Optional: Name that will appear in the "From" field (e.g., "John Doe")</div>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <div class="form-check">
+                                {{ form.is_active(class="form-check-input") }}
+                                {{ form.is_active.label(class="form-check-label") }}
+                            </div>
+                            <div class="form-text">Only one configuration can be active at a time</div>
+                        </div>
+                        
+                        <div class="d-flex justify-content-between">
+                            <a href="{{ url_for('main.smtp_configs') }}" class="btn btn-secondary">Cancel</a>
+                            <div>
+                                {% if config %}
+                                    <button type="button" class="btn btn-outline-primary me-2 test-smtp-btn" data-config-id="{{ config.id }}">
+                                        <i class="bi bi-wifi me-1"></i>Test Connection
+                                    </button>
+                                {% endif %}
+                                {{ form.submit(class="btn btn-primary") }}
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <!-- SMTP Provider Quick Setup -->
+            <div class="card mt-4">
+                <div class="card-header">
+                    <h6 class="mb-0">
+                        <i class="bi bi-lightning me-2"></i>Quick Setup for Popular Providers
+                    </h6>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-4">
+                            <div class="card border">
+                                <div class="card-body text-center">
+                                    <h6>Gmail</h6>
+                                    <button class="btn btn-sm btn-outline-primary" onclick="fillGmailSettings()">
+                                        Use Gmail Settings
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="card border">
+                                <div class="card-body text-center">
+                                    <h6>Outlook</h6>
+                                    <button class="btn btn-sm btn-outline-primary" onclick="fillOutlookSettings()">
+                                        Use Outlook Settings
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="card border">
+                                <div class="card-body text-center">
+                                    <h6>Yahoo</h6>
+                                    <button class="btn btn-sm btn-outline-primary" onclick="fillYahooSettings()">
+                                        Use Yahoo Settings
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Security Tips -->
+            <div class="card mt-4">
+                <div class="card-header">
+                    <h6 class="mb-0">
+                        <i class="bi bi-shield-check me-2"></i>Security Tips
+                    </h6>
+                </div>
+                <div class="card-body">
+                    <ul class="mb-0">
+                        <li><strong>Gmail:</strong> Enable 2-factor authentication and use App Passwords instead of your regular password</li>
+                        <li><strong>Outlook:</strong> Use your regular email password, but consider enabling 2FA</li>
+                        <li><strong>Yahoo:</strong> Enable "Less secure app access" or use App Passwords</li>
+                        <li><strong>All providers:</strong> Your password is encrypted and stored securely</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div id="alert-container"></div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+function fillGmailSettings() {
+    document.getElementById('smtp_server').value = 'smtp.gmail.com';
+    document.getElementById('smtp_port').value = '587';
+    document.getElementById('use_tls').checked = true;
+    document.getElementById('use_ssl').checked = false;
+}
+
+function fillOutlookSettings() {
+    document.getElementById('smtp_server').value = 'smtp-mail.outlook.com';
+    document.getElementById('smtp_port').value = '587';
+    document.getElementById('use_tls').checked = true;
+    document.getElementById('use_ssl').checked = false;
+}
+
+function fillYahooSettings() {
+    document.getElementById('smtp_server').value = 'smtp.mail.yahoo.com';
+    document.getElementById('smtp_port').value = '587';
+    document.getElementById('use_tls').checked = true;
+    document.getElementById('use_ssl').checked = false;
+}
+</script>
+{% endblock %}

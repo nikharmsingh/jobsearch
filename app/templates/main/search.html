@@ -1,0 +1,147 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container py-4">
+    <div class="row">
+        <div class="col-12">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h1 class="h3 mb-0">Search Company</h1>
+                <a href="{{ url_for('main.dashboard') }}" class="btn btn-outline-primary">
+                    <i class="bi bi-arrow-left me-2"></i>Back to Dashboard
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0">
+                        <i class="bi bi-search me-2"></i>Company Information
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <form method="POST">
+                        {{ form.hidden_tag() }}
+                        
+                        <div class="mb-3">
+                            {{ form.company_name.label(class="form-label") }}
+                            <div class="input-group">
+                                {{ form.company_name(class="form-control" + (" is-invalid" if form.company_name.errors else ""), placeholder="e.g., Google, Microsoft, Apple") }}
+                                <button type="button" class="btn btn-outline-secondary" id="find-domain-btn">
+                                    <i class="bi bi-globe me-1"></i>Find Domain
+                                </button>
+                            </div>
+                            {% if form.company_name.errors %}
+                                <div class="invalid-feedback d-block">
+                                    {% for error in form.company_name.errors %}
+                                        {{ error }}
+                                    {% endfor %}
+                                </div>
+                            {% endif %}
+                            <div class="form-text">Enter the company name you want to apply to</div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="company_domain" class="form-label">Company Domain</label>
+                            <div class="input-group">
+                                <input type="text" class="form-control" id="company_domain" name="company_domain" placeholder="e.g., google.com" readonly>
+                                <div class="btn-group" role="group">
+                                    <button type="button" class="btn btn-outline-secondary" id="find-emails-btn">
+                                        <i class="bi bi-person-lines-fill me-1"></i>Find HR Contacts
+                                    </button>
+                                    <button type="button" class="btn btn-outline-primary" id="find-emails-serp-btn" title="SERP API - India-focused HR search">
+                                        <i class="bi bi-geo-alt me-1"></i>SERP API (India)
+                                    </button>
+                                </div>
+                            </div>
+                            <div class="form-text">Company domain will be automatically detected. Use SERP API for India-based HR professionals.</div>
+                        </div>
+                        
+                        <div class="mb-3">
+                            {{ form.position.label(class="form-label") }}
+                            {{ form.position(class="form-control" + (" is-invalid" if form.position.errors else ""), placeholder="e.g., Software Engineer, Marketing Manager") }}
+                            {% if form.position.errors %}
+                                <div class="invalid-feedback">
+                                    {% for error in form.position.errors %}
+                                        {{ error }}
+                                    {% endfor %}
+                                </div>
+                            {% endif %}
+                            <div class="form-text">Position or role you're applying for (optional)</div>
+                        </div>
+                        
+                        <div class="mb-3">
+                            {{ form.notes.label(class="form-label") }}
+                            {{ form.notes(class="form-control" + (" is-invalid" if form.notes.errors else ""), rows="3", placeholder="Any additional notes about this company or position...") }}
+                            {% if form.notes.errors %}
+                                <div class="invalid-feedback">
+                                    {% for error in form.notes.errors %}
+                                        {{ error }}
+                                    {% endfor %}
+                                </div>
+                            {% endif %}
+                        </div>
+
+                        <!-- HR Contacts Results -->
+                        <div id="hr-emails-container" class="mb-3" style="display: none;">
+                            <h6>HR Contacts Found:</h6>
+                            <!-- Dynamic content will be inserted here -->
+                        </div>
+                        
+                        <div class="d-grid">
+                            {{ form.submit(class="btn btn-primary btn-lg") }}
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <!-- Instructions Card -->
+            <div class="card mt-4">
+                <div class="card-header">
+                    <h6 class="mb-0">
+                        <i class="bi bi-info-circle me-2"></i>How to Use
+                    </h6>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <h6>Step 1: Enter Company Name</h6>
+                            <p class="text-muted small">Type the name of the company you want to apply to. Be as specific as possible.</p>
+                            
+                            <h6>Step 2: Find Domain</h6>
+                            <p class="text-muted small">Click "Find Domain" to automatically discover the company's website.</p>
+                        </div>
+                        <div class="col-md-6">
+                            <h6>Step 3: Find HR Contacts</h6>
+                            <p class="text-muted small">Once the domain is found, click "Find HR Contacts" to discover HR professionals.</p>
+                            
+                            <h6>Step 4: Complete Search</h6>
+                            <p class="text-muted small">Add any additional information and click "Search Company" to save your search.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div id="alert-container"></div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Show HR emails container when emails are found
+    const originalDisplayHREmails = JobSearchApp.displayHREmails;
+    JobSearchApp.displayHREmails = function(emails) {
+        const container = document.getElementById('hr-emails-container');
+        if (container) {
+            container.style.display = 'block';
+        }
+        originalDisplayHREmails.call(this, emails);
+    };
+});
+</script>
+{% endblock %}
