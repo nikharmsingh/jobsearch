@@ -49,13 +49,10 @@ COPY docker-entrypoint.sh /usr/local/bin/
 RUN chmod +x /usr/local/bin/docker-entrypoint.sh
 
 # Create instance directory for SQLite database
-RUN mkdir -p instance
+RUN mkdir -p instance && chmod 755 instance
 
-# Create a non-root user and set permissions
-RUN adduser --disabled-password --gecos '' appuser && \
-    chown -R appuser:appuser /app && \
-    chmod +x /usr/local/bin/docker-entrypoint.sh
-USER appuser
+# Make entrypoint script executable
+RUN chmod +x /usr/local/bin/docker-entrypoint.sh
 
 # Expose port
 EXPOSE 5000
