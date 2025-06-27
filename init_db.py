@@ -16,8 +16,12 @@ create_app = app_main.create_app
 
 def init_database():
     """Initialize the database with tables"""
+    # Ensure instance directory exists
+    instance_dir = os.path.join(os.path.dirname(__file__), 'instance')
+    os.makedirs(instance_dir, exist_ok=True)
+
     app = create_app()
-    
+
     with app.app_context():
         # Create all tables
         db.create_all()

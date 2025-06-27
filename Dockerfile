@@ -48,8 +48,8 @@ COPY . .
 COPY docker-entrypoint.sh /usr/local/bin/
 RUN chmod +x /usr/local/bin/docker-entrypoint.sh
 
-# Create instance directory for SQLite database
-RUN mkdir -p instance && chmod 755 instance
+# Create instance directory for SQLite database with proper permissions
+RUN mkdir -p /app/instance && chmod 755 /app/instance && chown -R root:root /app/instance
 
 # Make entrypoint script executable
 RUN chmod +x /usr/local/bin/docker-entrypoint.sh
